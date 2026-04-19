@@ -24,36 +24,23 @@ namespace GestionMateriel.Controllers
         // Tableau de bord principal du Responsable
         public async Task<IActionResult> Responsable()
         {
-            // 1. Réservations en attente
-            var reservationsEnAttente = await _context.Reservations
-                .CountAsync(r => r.Statut == "En attente");
+            var reservationsEnAttente = await _context.Reservations.CountAsync(r => r.Statut == "En attente");
+            var rapportsNonLus = await _context.Rapports.CountAsync(r => !r.EstLu);
 
-            // 2. Rapports non lus
-            var rapportsNonLus = await _context.Rapports
-                .CountAsync(r => !r.EstLu);
-
-            // 3. Matériel le plus réservé
             var materielPlusReserve = await _context.ReservationEquipements
                 .GroupBy(re => re.EquipementId)
                 .Select(g => new
                 {
-                    EquipementId = g.Key,
                     NomEquipement = g.First().Equipement!.Nom,
-                    NombreReservations = g.Count()
+                    Nombre = g.Count()
                 })
-                .OrderByDescending(x => x.NombreReservations)
+                .OrderByDescending(x => x.Nombre)
                 .FirstOrDefaultAsync();
-
-            // Statistiques supplémentaires
-            var totalEquipements = await _context.Equipements.CountAsync();
-            var equipementsDisponibles = await _context.Equipements.CountAsync(e => e.EstDisponible);
 
             ViewBag.ReservationsEnAttente = reservationsEnAttente;
             ViewBag.RapportsNonLus = rapportsNonLus;
-            ViewBag.TotalEquipements = totalEquipements;
-            ViewBag.EquipementsDisponibles = equipementsDisponibles;
             ViewBag.MaterielPlusReserve = materielPlusReserve?.NomEquipement ?? "Aucun";
-            ViewBag.NombreReservationsMax = materielPlusReserve?.NombreReservations ?? 0;
+            ViewBag.NombreMax = materielPlusReserve?.Nombre ?? 0;
 
             return View();
         }

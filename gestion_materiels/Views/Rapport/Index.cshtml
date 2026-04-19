@@ -1,0 +1,70 @@
+﻿@model IEnumerable<GestionMateriel.Models.Rapport>
+
+@{
+    ViewData["Title"] = "Rapports d'utilisation";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">📋 Rapports d'utilisation du matériel</h1>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date Rapport</th>
+                        <th>Enseignant</th>
+                        <th>Équipement(s)</th>
+                        <th>État du matériel</th>
+                        <th>Commentaire</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.DateRapport.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@item.Reservation?.Enseignant?.NomComplet</td>
+                            <td>
+                                @string.Join(", ", item.Reservation?.ReservationEquipements.Select(re => re.Equipement?.Nom) ?? Enumerable.Empty<string>())
+                            </td>
+                            <td>
+                                @if (item.EstEnBonEtat)
+                                {
+                                    <span class="badge bg-success">✅ Bon état</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">⚠️ Problème</span>
+                                }
+                            </td>
+                            <td>@item.Commentaire</td>
+                            <td>
+                                @if (!item.EstLu)
+                                {
+                                    <span class="badge bg-warning">Non lu</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Lu</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!item.EstLu)
+                                {
+                                    <form asp-action="MarquerCommeLu" asp-route-id="@item.Id" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-primary">Marquer comme lu</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

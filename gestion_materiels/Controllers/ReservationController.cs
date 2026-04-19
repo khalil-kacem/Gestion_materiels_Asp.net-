@@ -97,6 +97,7 @@ namespace GestionMateriel.Controllers
             return RedirectToAction(nameof(MesReservations));
         }
 
+
         // Approbation / Refus par le Responsable
         [Authorize(Roles = "Responsable")]
         [HttpPost]
@@ -124,6 +125,63 @@ namespace GestionMateriel.Controllers
                 TempData["Success"] = "Réservation refusée.";
             }
             return RedirectToAction(nameof(Index));
+        }
+        // Remise du matériel + création du rapport (Enseignant)
+        [Authorize(Roles = "Enseignant")]
+        public async Task<IActionResult> RendreMateriel(int reservationId)
+        {
+            var reservation = await _context.Reservations
+                .Include(r => r.ReservationEquipements)
+                .ThenInclude(re => re.Equipement)
+                .FirstOrDefaultAsync(r => r.Id == reservationId);
+
+            if (reservation == null || reservation.EnseignantId != _userManager.GetUserId(User))
+                return NotFound();
+
+            ViewBag.Reservation = reservation;
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Enseignant")]
+        public async Task<IActionResult> RendreMateriel(int reservationId, string commentaire, bool estEnBonEtat, string? probleme)
+        {
+            var reservation = await _context.Reservations
+                .Include(r => r.ReservationEquipements)
+                .FirstOrDefaultAsync(r => r.Id == reservationId);
+
+            if (reservation == null) return NotFound();
+
+            // Création du rapport
+            var rapport = new Rapport
+            {
+                ReservationId = reservationId,
+                Commentaire = commentaire,
+                EstEnBonEtat = estEnBonEtat,
+                ProblemeSignale = probleme,
+                EstLu = false
+            };
+
+            _context.Rapports.Add(rapport);
+
+            // Mise à jour de la réservation
+            reservation.Statut = "Terminée";
+
+            // Libérer les équipements
+            foreach (var re in reservation.ReservationEquipements)
+            {
+                if (re.Equipement != null)
+                {
+                    re.Equipement.EstDisponible = true;
+                    re.Equipement.DateRetourPrevue = null;
+                    re.Equipement.EstReserve = false;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Matériel rendu avec succès. Rapport enregistré.";
+            return RedirectToAction(nameof(MesReservations));
         }
     }
 }

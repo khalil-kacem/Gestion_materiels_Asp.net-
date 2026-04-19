@@ -1,0 +1,46 @@
+﻿@model GestionMateriel.Models.Reservation
+
+@{
+    ViewData["Title"] = "Rendre le Matériel";
+}
+
+<div class="card shadow">
+    <div class="card-header">
+        <h5>Rendre le matériel - Rapport d'utilisation</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="RendreMateriel" method="post">
+            <input type="hidden" name="reservationId" value="@Model.Id" />
+
+            <div class="mb-3">
+                <label class="form-label">Équipements réservés</label>
+                <ul class="list-group">
+                    @foreach (var item in Model.ReservationEquipements)
+                    {
+                        <li class="list-group-item">@item.Equipement?.Nom</li>
+                    }
+                </ul>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Commentaire / État du matériel</label>
+                <textarea name="commentaire" class="form-control" rows="4" required placeholder="Le matériel était-il en bon état ?"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input type="checkbox" name="estEnBonEtat" class="form-check-input" checked>
+                    <label class="form-check-label">Le matériel a été rendu en bon état</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Problème signalé (optionnel)</label>
+                <textarea name="probleme" class="form-control" rows="2"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-lg">Confirmer le retour du matériel</button>
+            <a asp-action="MesReservations" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+</div>
