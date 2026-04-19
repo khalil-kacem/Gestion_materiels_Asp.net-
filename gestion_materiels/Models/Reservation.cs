@@ -13,10 +13,12 @@ namespace GestionMateriel.Models
 
         [Required]
         [Display(Name = "Date de début")]
+        [DataType(DataType.DateTime)]
         public DateTime DateDebut { get; set; }
 
         [Required]
         [Display(Name = "Date de retour prévue")]
+        [DataType(DataType.DateTime)]
         public DateTime DateRetourPrevue { get; set; }
 
         [Display(Name = "Statut")]
@@ -24,7 +26,10 @@ namespace GestionMateriel.Models
 
         public DateTime DateCreation { get; set; } = DateTime.Now;
 
-        // Relation plusieurs-à-plusieurs avec Equipement
+        // Relation plusieurs équipements
         public ICollection<ReservationEquipement> ReservationEquipements { get; set; } = new List<ReservationEquipement>();
+
+        [Display(Name = "Commentaire")]
+        public string? Commentaire { get; set; }
     }
 }

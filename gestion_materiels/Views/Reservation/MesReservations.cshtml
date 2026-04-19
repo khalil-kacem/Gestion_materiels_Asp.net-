@@ -1,0 +1,60 @@
+﻿@model IEnumerable<GestionMateriel.Models.Reservation>
+
+@{
+    ViewData["Title"] = "Mes Réservations";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Mes Réservations</h1>
+    <a asp-action="Create" class="btn btn-primary shadow-sm">
+        <i class="fas fa-plus"></i> Nouvelle Réservation
+    </a>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date Création</th>
+                        <th>Équipements</th>
+                        <th>Date Début</th>
+                        <th>Date Retour</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.DateCreation.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @string.Join(", ", item.ReservationEquipements.Select(re => re.Equipement?.Nom))
+                            </td>
+                            <td>@item.DateDebut.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@item.DateRetourPrevue.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @switch (item.Statut)
+                                {
+                                    case "En attente":
+                                        <span class="badge bg-warning">En attente</span>
+                                        ; break;
+                                    case "Approuvée":
+                                        <span class="badge bg-success">Approuvée</span>
+                                        ; break;
+                                    case "Refusée":
+                                        <span class="badge bg-danger">Refusée</span>
+                                        ; break;
+                                    default:
+                                        <span class="badge bg-secondary">@item.Statut</span>
+                                        ; break;
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

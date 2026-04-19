@@ -1,0 +1,73 @@
+﻿@model GestionMateriel.Models.Reservation
+
+@{
+    ViewData["Title"] = "Nouvelle Réservation";
+    var equipementsDisponibles = ViewBag.Equipements as List<GestionMateriel.Models.Equipement>;
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">📅 Nouvelle Réservation de Matériel</h1>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Sélectionnez les équipements et les dates</h6>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Sélection multiple d'équipements -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Équipements disponibles</label>
+                <div class="row">
+                    @if (equipementsDisponibles != null && equipementsDisponibles.Any())
+                    {
+                        @foreach (var eq in equipementsDisponibles)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check border p-3 rounded">
+                                    <input type="checkbox" name="equipementIds" value="@eq.Id" class="form-check-input" id="eq_@eq.Id">
+                                    <label class="form-check-label" for="eq_@eq.Id">
+                                        <strong>@eq.Nom</strong><br>
+                                        <small class="text-muted">@eq.Categorie?.Nom</small>
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">Aucun équipement disponible pour le moment.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Dates -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Date et heure de début</label>
+                        <input type="datetime-local" name="dateDebut" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Date et heure de retour</label>
+                        <input type="datetime-local" name="dateRetourPrevue" class="form-control" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Commentaire (optionnel)</label>
+                <textarea name="commentaire" class="form-control" rows="3" placeholder="Ex: Utilisation pour cours de physique..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="fas fa-paper-plane"></i> Envoyer la demande de réservation
+            </button>
+            <a asp-action="MesReservations" class="btn btn-secondary btn-lg">Annuler</a>
+        </form>
+    </div>
+</div>

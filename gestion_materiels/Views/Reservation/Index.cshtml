@@ -1,0 +1,64 @@
+﻿@model IEnumerable<GestionMateriel.Models.Reservation>
+
+@{
+    ViewData["Title"] = "Gestion des Réservations";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Gestion des Réservations</h1>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Enseignant</th>
+                        <th>Équipements</th>
+                        <th>Date Début</th>
+                        <th>Date Retour</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Enseignant?.NomComplet</td>
+                            <td>@string.Join(", ", item.ReservationEquipements.Select(re => re.Equipement?.Nom))</td>
+                            <td>@item.DateDebut.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@item.DateRetourPrevue.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @switch (item.Statut)
+                                {
+                                    case "En attente":
+                                        <span class="badge bg-warning">En attente</span>
+                                        ; break;
+                                    case "Approuvée":
+                                        <span class="badge bg-success">✅ Approuvée</span>
+                                        ; break;
+                                    case "Refusée":
+                                        <span class="badge bg-danger">❌ Refusée</span>
+                                        ; break;
+                                }
+                            </td>
+                            <td>
+                                @if (item.Statut == "En attente")
+                                {
+                                    <form asp-action="Approuver" asp-route-id="@item.Id" style="display:inline;">
+                                        <button type="submit" class="btn btn-success btn-sm">Approuver</button>
+                                    </form>
+                                    <form asp-action="Refuser" asp-route-id="@item.Id" style="display:inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm">Refuser</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
