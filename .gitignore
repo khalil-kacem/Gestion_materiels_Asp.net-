@@ -1,0 +1,8 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+wwwroot/lib/
+Migrations/
+appsettings.Development.json

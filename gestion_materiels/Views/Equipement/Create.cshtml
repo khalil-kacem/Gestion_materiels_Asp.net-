@@ -1,0 +1,47 @@
+﻿@model GestionMateriel.Models.Equipement
+
+@{
+    ViewData["Title"] = "Ajouter un équipement";
+}
+
+<div class="card shadow">
+    <div class="card-header">
+        <h5>Ajouter un nouvel équipement</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Nom" class="form-label"></label>
+                <input asp-for="Nom" class="form-control" />
+                <span asp-validation-for="Nom" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CategorieId" class="form-label"></label>
+                <select asp-for="CategorieId" class="form-select">
+                    <option value="">-- Choisir une catégorie --</option>
+                    @foreach (var cat in (List<GestionMateriel.Models.Categorie>)ViewBag.Categories ?? new List<GestionMateriel.Models.Categorie>())
+                    {
+                        <option value="@cat.Id">@cat.Nom</option>
+                    }
+                </select>
+                <span asp-validation-for="CategorieId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input asp-for="EstDisponible" class="form-check-input" />
+                <label asp-for="EstDisponible" class="form-check-label"></label>
+            </div>
+
+            <button type="submit" class="btn btn-success">Enregistrer l'équipement</button>
+            <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+</div>

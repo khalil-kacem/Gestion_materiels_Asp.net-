@@ -1,0 +1,126 @@
+﻿@using GestionMateriel.Models
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var roles = user != null ? await UserManager.GetRolesAsync(user) : new List<string>();
+    bool isAdmin = roles.Contains("Administrateur");
+    bool isResponsable = roles.Contains("Responsable");
+    bool isEnseignant = roles.Contains("Enseignant");
+    string roleDisplay = isAdmin ? "Administrateur" : isResponsable ? "Responsable Matériel" : isEnseignant ? "Enseignant" : "Utilisateur";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gestion du Matériel</title>
+
+    <!-- SB Admin 2 CSS -->
+    <link href="~/lib/sb-admin-2/css/sb-admin-2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+</head>
+<body id="page-top">
+
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-controller="Home" asp-action="Index">
+                <div class="sidebar-brand-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">Matériel <sup>Pro</sup></div>
+            </a>
+
+            <hr class="sidebar-divider my-0">
+
+            <!-- Menu selon le rôle -->
+            @if (isAdmin)
+            {
+                <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Index"><i class="fas fa-users"></i> <span>Gestion Utilisateurs</span></a></li>
+            }
+
+            @if (isResponsable)
+            {
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Dashboard" asp-action="Responsable">
+                        <i class="fas fa-tachometer-alt"></i> <span>Tableau de Bord</span>
+                    </a>
+                </li>
+            }
+
+            @if (isEnseignant)
+            {
+                <li class="nav-item"><a class="nav-link" asp-controller="Equipement" asp-action="Index"><i class="fas fa-search"></i> <span>Consulter le Matériel</span></a></li>
+                <li class="nav-item"><a class="nav-link" asp-controller="Reservation" asp-action="MesReservations"><i class="fas fa-calendar"></i> <span>Mes Réservations</span></a></li>
+            }
+
+            <hr class="sidebar-divider">
+
+            <li class="nav-item">
+                <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index">
+                    <i class="fas fa-user"></i> <span>Mon Profil</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Topbar -->
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="mr-2 d-none d-lg-inline text-gray-600 small">@user?.NomComplet <small>(@roleDisplay)</small></span>
+                            <img class="img-profile rounded-circle" src="https://via.placeholder.com/60" alt="">
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                            <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Logout">
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Déconnexion
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Main Content -->
+            <div id="content">
+                <div class="container-fluid">
+                    @RenderBody()
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>&copy; 2026 - Système de Gestion du Matériel - Tous droits réservés</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- SB Admin 2 JS -->
+    <script src="~/lib/sb-admin-2/js/sb-admin-2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

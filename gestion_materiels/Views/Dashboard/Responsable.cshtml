@@ -1,0 +1,170 @@
+﻿@{
+    ViewData["Title"] = "Tableau de Bord - Responsable";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Tableau de Bord Responsable</h1>
+    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+        <i class="fas fa-download fa-sm text-white-50"></i> Générer Rapport PDF
+    </a>
+</div>
+
+<!-- Cartes statistiques -->
+<div class="row">
+    <!-- Réservations en attente -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Réservations en attente
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.ReservationsEnAttente</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rapports non lus -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            Rapports non lus
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.RapportsNonLus</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-file-alt fa-2x text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total équipements -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Total Équipements
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalEquipements</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-boxes fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Matériel le plus réservé -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Matériel le plus réservé
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.MaterielPlusReserve</div>
+                        <div class="text-xs text-gray-500">(@ViewBag.NombreReservationsMax réservations)</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-trophy fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Graphiques -->
+<div class="row">
+    <div class="col-xl-8 col-lg-7">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Évolution des Réservations (Derniers 6 mois)</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="reservationsChart" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-lg-5">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Disponibilité du Matériel</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="disponibiliteChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section actions rapides -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Actions Rapides</h6>
+            </div>
+            <div class="card-body">
+                <a href="@Url.Action("Index", "Reservation")" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-calendar-check"></i> Vérifier les Réservations
+                </a>
+                <a href="@Url.Action("Index", "Equipement")" class="btn btn-success btn-lg me-3">
+                    <i class="fas fa-box"></i> Gérer l'Inventaire
+                </a>
+                <a href="@Url.Action("Index", "Rapport")" class="btn btn-warning btn-lg">
+                    <i class="fas fa-file-alt"></i> Consulter les Rapports
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Graphique des réservations
+        var ctx1 = document.getElementById('reservationsChart');
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+                datasets: [{
+                    label: 'Réservations',
+                    data: [12, 19, 8, 25, 14, 22],
+                    borderColor: '#4e73df',
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        var ctx2 = document.getElementById('disponibiliteChart');
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: ['Disponible', 'Réservé'],
+                datasets: [{
+                    data: [@ViewBag.EquipementsDisponibles, @ViewBag.TotalEquipements - @ViewBag.EquipementsDisponibles],
+                    backgroundColor: ['#1cc88a', '#e74a3b']
+                }]
+            },
+            options: { responsive: true }
+        });
+    </script>
+}

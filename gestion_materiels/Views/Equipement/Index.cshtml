@@ -1,0 +1,88 @@
+﻿@model IEnumerable<GestionMateriel.Models.Equipement>
+
+@{
+    ViewData["Title"] = "Gestion des Équipements";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">📦 Gestion du Matériel</h1>
+    @if (User.IsInRole("Responsable") || User.IsInRole("Administrateur"))
+    {
+        <a asp-action="Create" class="btn btn-success shadow-sm">
+            <i class="fas fa-plus"></i> Ajouter un équipement
+        </a>
+    }
+</div>
+
+<!-- Filtre par catégorie -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Filtrer par catégorie</label>
+                <select name="categorieFilter" class="form-select">
+                    <option value="">Toutes les catégories</option>
+                    @foreach (var cat in (List<string>)ViewBag.Categories ?? new List<string>())
+                    {
+                        <option value="@cat" selected="@(ViewBag.CategorieFilter == cat ? "selected" : null)">@cat</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 align-self-end">
+                <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tableau des équipements -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Liste des équipements (@Model.Count() au total)</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nom</th>
+                        <th>Catégorie</th>
+                        <th>Description</th>
+                        <th>Disponibilité</th>
+                        <th>Date Retour Prévue</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong>@item.Nom</strong></td>
+                            <td>@item.Categorie?.Nom</td>
+                            <td>@item.Description</td>
+                            <td>
+                                @if (item.EstDisponible)
+                                {
+                                    <span class="badge bg-success">✅ Disponible</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">❌ Réservé</span>
+                                }
+                            </td>
+                            <td>@(item.DateRetourPrevue?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Voir</a>
+                                @if (User.IsInRole("Responsable") || User.IsInRole("Administrateur"))
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Modifier</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Supprimer</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
