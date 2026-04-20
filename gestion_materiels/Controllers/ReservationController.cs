@@ -18,14 +18,19 @@ namespace GestionMateriel.Controllers
             _userManager = userManager;
         }
 
-        // Enseignant : Mes réservations
+        // ==================== ENSEIGNANT ====================
+
+        // Mes réservations
         [Authorize(Roles = "Enseignant")]
         public async Task<IActionResult> MesReservations()
         {
             var userId = _userManager.GetUserId(User);
+
             var reservations = await _context.Reservations
                 .Include(r => r.ReservationEquipements)
-                .ThenInclude(re => re.Equipement)
+                    .ThenInclude(re => re.Equipement)
+                .Include(r => r.ReservationEquipements)
+                    .ThenInclude(re => re.Equipement!.Categorie)
                 .Where(r => r.EnseignantId == userId)
                 .OrderByDescending(r => r.DateCreation)
                 .ToListAsync();
@@ -33,21 +38,7 @@ namespace GestionMateriel.Controllers
             return View(reservations);
         }
 
-        // Responsable : Toutes les réservations
-        [Authorize(Roles = "Responsable")]
-        public async Task<IActionResult> Index()
-        {
-            var reservations = await _context.Reservations
-                .Include(r => r.Enseignant)
-                .Include(r => r.ReservationEquipements)
-                .ThenInclude(re => re.Equipement)
-                .OrderByDescending(r => r.DateCreation)
-                .ToListAsync();
-
-            return View(reservations);
-        }
-
-        // Formulaire de réservation (Enseignant)
+        // Formulaire de création de réservation
         [Authorize(Roles = "Enseignant")]
         public async Task<IActionResult> Create()
         {
@@ -97,42 +88,13 @@ namespace GestionMateriel.Controllers
             return RedirectToAction(nameof(MesReservations));
         }
 
-
-        // Approbation / Refus par le Responsable
-        [Authorize(Roles = "Responsable")]
-        [HttpPost]
-        public async Task<IActionResult> Approuver(int id)
-        {
-            var reservation = await _context.Reservations.FindAsync(id);
-            if (reservation != null)
-            {
-                reservation.Statut = "Approuvée";
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Réservation approuvée avec succès.";
-            }
-            return RedirectToAction(nameof(Index));
-        }
-
-        [Authorize(Roles = "Responsable")]
-        [HttpPost]
-        public async Task<IActionResult> Refuser(int id)
-        {
-            var reservation = await _context.Reservations.FindAsync(id);
-            if (reservation != null)
-            {
-                reservation.Statut = "Refusée";
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Réservation refusée.";
-            }
-            return RedirectToAction(nameof(Index));
-        }
-        // Remise du matériel + création du rapport (Enseignant)
+        // Rendre le matériel + créer un rapport
         [Authorize(Roles = "Enseignant")]
         public async Task<IActionResult> RendreMateriel(int reservationId)
         {
             var reservation = await _context.Reservations
                 .Include(r => r.ReservationEquipements)
-                .ThenInclude(re => re.Equipement)
+                    .ThenInclude(re => re.Equipement)
                 .FirstOrDefaultAsync(r => r.Id == reservationId);
 
             if (reservation == null || reservation.EnseignantId != _userManager.GetUserId(User))
@@ -182,6 +144,69 @@ namespace GestionMateriel.Controllers
 
             TempData["Success"] = "Matériel rendu avec succès. Rapport enregistré.";
             return RedirectToAction(nameof(MesReservations));
+        }
+
+        // ==================== RESPONSABLE ====================
+
+        // Liste de toutes les réservations
+        [Authorize(Roles = "Responsable")]
+        public async Task<IActionResult> Index()
+        {
+            var reservations = await _context.Reservations
+                .Include(r => r.Enseignant)
+                .Include(r => r.ReservationEquipements)
+                    .ThenInclude(re => re.Equipement)
+                .OrderByDescending(r => r.DateCreation)
+                .ToListAsync();
+
+            return View(reservations);
+        }
+
+        // Approuver une réservation
+        [Authorize(Roles = "Responsable")]
+        [HttpPost]
+        public async Task<IActionResult> Approuver(int id)
+        {
+            var reservation = await _context.Reservations.FindAsync(id);
+            if (reservation != null)
+            {
+                reservation.Statut = "Approuvée";
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Réservation approuvée avec succès.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+        [Authorize(Roles = "Enseignant")]
+        public async Task<IActionResult> Alertes()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var reservationsEnRetard = await _context.Reservations
+                .Include(r => r.ReservationEquipements)
+                .ThenInclude(re => re.Equipement)
+                .Where(r => r.EnseignantId == userId
+                         && r.Statut == "Approuvée"
+                         && r.DateRetourPrevue < DateTime.Now)
+                .ToListAsync();
+
+            ViewBag.ReservationsEnRetard = reservationsEnRetard.Count;
+
+            return View(reservationsEnRetard);
+        }
+
+        // Refuser une réservation
+        [Authorize(Roles = "Responsable")]
+        [HttpPost]
+        public async Task<IActionResult> Refuser(int id)
+        {
+            var reservation = await _context.Reservations.FindAsync(id);
+            if (reservation != null)
+            {
+                reservation.Statut = "Refusée";
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Réservation refusée.";
+            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }

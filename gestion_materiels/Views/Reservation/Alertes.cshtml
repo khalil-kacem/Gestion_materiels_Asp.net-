@@ -1,0 +1,58 @@
+﻿@model IEnumerable<GestionMateriel.Models.Reservation>
+
+@{
+    ViewData["Title"] = "Alertes - Dépassements de date";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="fas fa-bell text-danger"></i> Mes Alertes de Dépassement
+    </h1>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="alert alert-danger mb-4">
+        <strong>Attention !</strong> Vous avez @Model.Count() réservation(s) en retard.
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Équipements</th>
+                        <th>Date de retour prévue</th>
+                        <th>Retard</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var joursRetard = (DateTime.Now - item.DateRetourPrevue).Days;
+                        <tr>
+                            <td>@string.Join(", ", item.ReservationEquipements.Select(re => re.Equipement?.Nom))</td>
+                            <td>@item.DateRetourPrevue.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><span class="badge bg-danger">@joursRetard jours</span></td>
+                            <td>
+                                <a asp-action="RendreMateriel" asp-route-reservationId="@item.Id"
+                                   class="btn btn-sm btn-warning">
+                                    Rendre maintenant
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle fa-2x"></i><br>
+        Aucune alerte pour le moment.<br>
+        Toutes vos réservations sont dans les temps.
+    </div>
+}
